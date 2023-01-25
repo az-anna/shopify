@@ -9,6 +9,12 @@ const nextConfig = {
         port: '',
         pathname: '/s/files/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ebayimg.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 }
