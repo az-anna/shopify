@@ -23,6 +23,7 @@
     "react-dom": "18.2.0",
     "react-lines-ellipsis": "^0.15.3",
     "react-quill": "^2.0.0",
+    "react-tag-input": "^6.8.1",
     "react-viewport-list": "^6.3.0",
     "react-window": "^1.8.8",
     "swiper": "^8.4.5",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
     "@types/react-lines-ellipsis": "^0.15.1",
+    "@types/react-tag-input": "^6.6.1",
     "@types/react-window": "^1.8.5",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",

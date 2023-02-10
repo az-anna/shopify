@@ -1,7 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { withRouter } from 'next/router';
+import { Tags } from '../components/Tags';
 import Link from 'next/link';
 import Editor from '../components/TextEditor';
+import { tagAtom } from '../utils/atoms'
+import { useAtom } from 'jotai'
 
 function Seller({ router: { query } }) {
   const [item, setItem] = useState()
@@ -9,6 +12,21 @@ function Seller({ router: { query } }) {
   const [price, setPrice] = useState<number>(0)
   const [exchangeRate, setExchangeRate] = useState<number>(1)
   const [profitRate, setProfitRate] = useState<number>(1)
+  const [title, setTitle] = useState<string>("")
+  const [tags,] = useAtom(tagAtom)
+
+  async function submitHandler(e: FormEvent) {
+    e.preventDefault()
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'React POST Request Example',
+
+      })
+    };
+    console.log("hi")
+  }
 
   useEffect(() => {
     if (query.eBayItem) {
@@ -31,6 +49,7 @@ function Seller({ router: { query } }) {
     }
   }, [item, exchangeRate, profitRate])
   console.log(item)
+  console.log(tags.map(tag => tag.id))
 
   return (
     <div className='p-5 bg-slate-100'>
@@ -49,6 +68,10 @@ function Seller({ router: { query } }) {
                     <div className="py-2 sm:grid sm:grid-cols-4 gap-x-2">
                       <dt className="text-sm font-medium text-gray-500">商品ID</dt>
                       <dd className="mt-1 text-sm text-gray-900 sm:col-span-3 sm:mt-0">{item.ItemID ? item.ItemID : null}</dd>
+                    </div>
+                    <div className="py-2 sm:grid sm:grid-cols-4 gap-x-2">
+                      <dt className="text-sm font-medium text-gray-500">販売者ID</dt>
+                      <dd className="mt-1 text-sm text-gray-900 sm:col-span-3 sm:mt-0">{item.Seller ? item.Seller.UserID : null}</dd>
                     </div>
                     <div className="py-2 sm:grid sm:grid-cols-4 gap-x-2">
                       <dt className="text-sm font-medium text-gray-500">ストアURL</dt>
@@ -113,7 +136,7 @@ function Seller({ router: { query } }) {
                       min="1"
                       step="0.1"
                       value={profitRate}
-                      onChange={e => e.target.value.length >0 ? setProfitRate(parseFloat(e.target.value)) : setProfitRate(NaN)}
+                      onChange={e => e.target.value.length > 0 ? setProfitRate(parseFloat(e.target.value)) : setProfitRate(NaN)}
                       className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2"
                     />
                   </div>
@@ -122,7 +145,7 @@ function Seller({ router: { query } }) {
             </div>
           </div>
           <div className="mt-5 md:col-span-3 md:mt-0">
-            <form action="#" method="POST">
+            <form onSubmit={submitHandler}>
               <div className="shadow sm:overflow-hidden sm:rounded-md">
                 <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                   <div className="grid grid-cols-3 gap-6">
@@ -136,23 +159,17 @@ function Seller({ router: { query } }) {
                           name="product-website"
                           id="product-title"
                           className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={e => setTitle(e.target.value)}
                         />
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-3 sm:col-span-3">
-                      <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
-                        商品カテゴリー
-                      </label>
-                      <div className="mt-1 flex rounded-md shadow-sm">
-                        <input
-                          type="text"
-                          name="product-type"
-                          id="product-type"
-                          className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
+                  <div className="">
+                    <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
+                      タグ
+                    </label>
+                    <div className="mt-1 flex rounded-md shadow-sm ">
+                      <Tags />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-12">

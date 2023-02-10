@@ -13,9 +13,10 @@ export interface Variants {
 
 export interface ShopifyProduct {
   id: number;
-  handle: string;
+  title: string;
   status: string;
-  updated_at: string;
+  updated_at: string | null;
+  created_at: string | null;
   variants: Variants[]
   images: ShopifyImage[];
 }

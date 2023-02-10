@@ -5,7 +5,7 @@ import Button from '../components/Button'
 import ProductItem from '../components/ProductItem'
 import Incrementer from '../components/Incrementer'
 import Modal from '../components/Modal'
-import { stockAtom } from '../utils/atoms'
+import { stockAtom} from '../utils/atoms'
 import { useAtom } from 'jotai'
 import { ShopifyProduct } from '../utils/types'
 import Link from 'next/link'
@@ -27,15 +27,11 @@ export default function Home({ products }: ShopifyProductProps ) {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [stock, setStock] = useAtom(stockAtom)
 
-  function filterProducts() {
+  async function filterProducts() {
     const searchTerms = searchTerm.replace('　', ' ').split(' ')
-    let filtered = products
-    if (searchTerm) {
-      searchTerms.forEach((query) => {
-        filtered = filtered.filter(item => item.handle.includes(query))
-      })
-      setFilteredProducts(filtered.slice(0, 100))
-    }
+    const res =await fetch(`http://localhost:8000/api/products/shopify?handle=${searchTerms}`)
+    const data = await res.json()
+    setFilteredProducts(data)
   }
 
   async function fetchItems() {
@@ -69,7 +65,6 @@ export default function Home({ products }: ShopifyProductProps ) {
       setEbayItemDetails(data['Item'])
     }
   }
-  console.log(selectedEbayItem)
   function onConfirm(e) {
     e.preventDefault();
 		setShowModal(false);
@@ -81,6 +76,7 @@ export default function Home({ products }: ShopifyProductProps ) {
   function updateQuantity (){
     setShowModal(true)
   }
+  console.log(products[0])
   return (
     <>
       <div className='mx-3 grid grid-cols-12 items-start gap-x-4'>
@@ -121,8 +117,10 @@ export default function Home({ products }: ShopifyProductProps ) {
                 >
                   <ProductItem
                     image={product.images[0]?.src}
-                    handle={product.handle}
+                    title={product.title}
                     price={"¥" + product.variants[0].price}
+                    created_at={product.created_at}
+                    updated_at={product.updated_at}
                   />
                 </li>
               ))}
@@ -170,7 +168,7 @@ export default function Home({ products }: ShopifyProductProps ) {
                 >
                   <ProductItem
                     image={item.galleryURL}
-                    handle={item.title}
+                    title={item.title}
                     price={item.sellingStatus.currentPrice._currencyId + " " + item.sellingStatus.currentPrice.value}
                   />
                 </li>
