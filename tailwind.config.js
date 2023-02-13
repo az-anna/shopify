@@ -5,7 +5,21 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        spin: 'spin 1.5s linear infinite'
+      },
+      keyframes: {
+        spin: {
+          from: {
+            transform: 'rotate(0deg)'
+          },
+          to: {
+            transform: 'rotate(360deg)'
+          }
+        }
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/forms'),

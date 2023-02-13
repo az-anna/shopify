@@ -4,6 +4,7 @@ import LinesEllipsis from 'react-lines-ellipsis'
 
 const ProductItem = (props) => {
   const image = props.image
+  const vendor = props.vendor
   const title = props.title
   const price = props.price
   const created_at = props.created_at ? new Date(props.created_at).toISOString().split("T")[0] : ""
@@ -24,7 +25,15 @@ const ProductItem = (props) => {
         <div className="ml-3">
           <LinesEllipsis
             text={title}
-            maxLine='2'
+            maxLine='1'
+            ellipsis='...'
+            trimRight
+            basedOn='letters'
+            className="text-xs text-gray-800"
+          />
+          <LinesEllipsis
+            text={vendor}
+            maxLine='1'
             ellipsis='...'
             trimRight
             basedOn='letters'

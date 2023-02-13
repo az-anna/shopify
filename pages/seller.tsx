@@ -1,31 +1,52 @@
 import { useState, useEffect, useMemo, FormEvent } from 'react';
-import { withRouter } from 'next/router';
+import { withRouter, useRouter } from 'next/router';
 import { Tags } from '../components/Tags';
 import Link from 'next/link';
 import Editor from '../components/TextEditor';
-import { tagAtom } from '../utils/atoms'
+import { descAtom, tagAtom } from '../utils/atoms'
 import { useAtom } from 'jotai'
+import { ConfirmationModal } from '../components/Modal';
 
 function Seller({ router: { query } }) {
+  const router = useRouter()
   const [item, setItem] = useState()
   const [isShipped, setIsShipped] = useState("")
   const [price, setPrice] = useState<number>(0)
+  const [sellingPrice, setSellingPrice] = useState<number>()
+  const [stocks, setStocks] = useState<number>()
   const [exchangeRate, setExchangeRate] = useState<number>(1)
   const [profitRate, setProfitRate] = useState<number>(1)
   const [title, setTitle] = useState<string>("")
-  const [tags,] = useAtom(tagAtom)
+  const [tags, setTags] = useAtom(tagAtom)
+  const [desc,setDesc] = useAtom(descAtom)
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const [status, setStatus] = useState<number>()
+  const [loading, setLoading] = useState<boolean>(false)
 
   async function submitHandler(e: FormEvent) {
     e.preventDefault()
+    setLoading(true)
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title: 'React POST Request Example',
-
+        title: title,
+        tags: tags.map(tag => tag.id).join(','),
+        vendor: item.Seller.UserID,
+        price: sellingPrice,
+        stocks: stocks,
+        description: desc,
+        images: item.PictureDetails.PictureURL,
       })
     };
-    console.log("hi")
+    const res = await fetch('http://localhost:8000/api/products/create', requestOptions)
+    if (res.status) {
+      setLoading(false)
+      setStatus(res.status)
+      setTags([{ id: '新着商品', text: '新着商品' }])
+      setDesc('')
+      setShowModal(true)
+    }
   }
 
   useEffect(() => {
@@ -43,13 +64,12 @@ function Seller({ router: { query } }) {
   }, [item])
   useEffect(() => {
     if (isNaN(exchangeRate) || isNaN(profitRate) || !item) {
-      //pass
     } else {
-      setPrice(Math.round(parseFloat(item.StartPrice.value) * exchangeRate * profitRate))
+      setPrice(Math.round(parseFloat(item.SellingStatus.CurrentPrice.value) * exchangeRate * profitRate))
     }
   }, [item, exchangeRate, profitRate])
   console.log(item)
-  console.log(tags.map(tag => tag.id))
+  console.log(status)
 
   return (
     <div className='p-5 bg-slate-100'>
@@ -95,7 +115,7 @@ function Seller({ router: { query } }) {
                     </div>
                     <div className="py-2 sm:grid sm:grid-cols-4 gap-x-2">
                       <dt className="text-sm font-medium text-gray-500">価格</dt>
-                      <dd className="mt-1 text-sm text-gray-900 sm:col-span-3 sm:mt-0">{item.StartPrice ? (item.StartPrice._currencyID + " " + item.StartPrice.value) : null}</dd>
+                      <dd className="mt-1 text-sm text-gray-900 sm:col-span-3 sm:mt-0">{item.SellingStatus ? (item.SellingStatus.CurrentPrice._currencyID + " " + item.SellingStatus.CurrentPrice.value) : null}</dd>
                     </div>
                     <div className="py-2 sm:grid sm:grid-cols-4 gap-x-2">
                       <dt className="text-sm font-medium text-gray-500">在庫数</dt>
@@ -183,6 +203,7 @@ function Seller({ router: { query } }) {
                           name="product-price"
                           id="product-price"
                           className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={e => setSellingPrice(parseInt(e.target.value))}
                         />
                       </div>
                     </div>
@@ -196,6 +217,7 @@ function Seller({ router: { query } }) {
                           name="product-quantity"
                           id="product-quantity"
                           className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={e => setStocks(parseInt(e.target.value))}
                         />
                       </div>
                     </div>
@@ -210,19 +232,40 @@ function Seller({ router: { query } }) {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
-                  <button
-                    type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Save
-                  </button>
+                <div className="bg-gray-50 px-4 py-3 text-center">
+
+                  {loading ? (
+                    <button type="button" className="w-40 inline-flex pr-5 justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm" disabled>
+                      <div className="flex m-auto justify-center items-center relative z-0">
+                        <div className="animate-spin h-4 w-4 mr-3 border-2 border-white rounded-full border-t-transparent border-r-transparent"></div>
+                        <div className="absolute inset-0 h-4 w-4 border-2 border-indigo-100 rounded-full opacity-40"></div>
+                      </div>
+                      Processing...
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-32 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Save
+                    </button>
+                  )
+                  }
                 </div>
               </div>
             </form>
           </div>
         </div>
       </div>
+      {showModal ? (
+        <>
+          <ConfirmationModal
+            status={status}
+            confirmBtn="Go Back to Main"
+            onConfirm={() => router.back()}
+          />
+        </>
+      ) : null}
     </div>
   )
 }

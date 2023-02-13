@@ -1,6 +1,7 @@
 import React from "react";
+import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
 
-const Modal = ({title, msg, confirmBtn, cancelBtn,onConfirm, onCancel}) => {
+export const Modal = ({ title, msg, confirmBtn, cancelBtn, onConfirm, onCancel }) => {
 
 	return (
 		<div
@@ -42,7 +43,7 @@ const Modal = ({title, msg, confirmBtn, cancelBtn,onConfirm, onCancel}) => {
 									</h3>
 									<div className="mt-2">
 										<p className="text-sm text-gray-500">
-                      {msg}
+											{msg}
 										</p>
 									</div>
 								</div>
@@ -52,14 +53,14 @@ const Modal = ({title, msg, confirmBtn, cancelBtn,onConfirm, onCancel}) => {
 							<button
 								type="button"
 								className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700  sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={onConfirm}
+								onClick={onConfirm}
 							>
 								{confirmBtn}
 							</button>
 							<button
 								type="button"
 								className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={onCancel}
+								onClick={onCancel}
 							>
 								{cancelBtn}
 							</button>
@@ -70,4 +71,62 @@ const Modal = ({title, msg, confirmBtn, cancelBtn,onConfirm, onCancel}) => {
 		</div>
 	);
 };
-export default Modal;
+
+export const ConfirmationModal = ({ status, confirmBtn, onConfirm }) => {
+	return (
+		<div
+			className="relative z-10 justify-center"
+			aria-labelledby="modal-title"
+			role="dialog"
+			aria-modal="true"
+		>
+			<div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+			<div className="fixed inset-0 z-10 overflow-y-auto">
+				<div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+					<div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
+						<div className='my-5'>
+							{status === 200 ? (
+								<>
+									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+										<CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
+									</div>
+									<div className="mt-3 text-center sm:mt-5">
+										Success Creating Product!
+									</div>
+								</>
+
+
+							) : (
+								<>
+									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+										<XMarkIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+									</div>
+									<div className="mt-3 text-center sm:mt-5">
+										Something Went Wrong
+									</div>
+									<div className="mt-2 text-center">
+										<p className="text-sm text-gray-500">
+											プロダクト作成がうまくいきませんでした。
+											<br></br>
+											アプリ管理者に連絡してください。
+										</p>
+									</div>
+								</>
+							)}
+						</div>
+						<div className="my-5 mx-16 flex items-center justify-center">
+							<button
+								type="button"
+								className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+								onClick={onConfirm}
+							>
+								{confirmBtn}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div >
+	);
+};
