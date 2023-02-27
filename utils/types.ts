@@ -5,10 +5,13 @@ export interface ShopifyImage {
 }
 
 export interface Variants {
+  barcode: string
   inventory_quantity: number
+  inventory_item_id: number
   inventory_id: number
   price: string
   sku: string
+  option1: string
 }
 
 

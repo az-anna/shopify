@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { withRouter, useRouter } from 'next/router';
 import { Tags } from '../components/Tags';
 import Link from 'next/link';
@@ -30,6 +30,7 @@ function Seller({ router: { query } }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        option2: item.ListingDetails.ViewItemURL,
         title: title,
         tags: tags.map(tag => tag.id).join(','),
         vendor: item.Seller.UserID,
@@ -37,6 +38,7 @@ function Seller({ router: { query } }) {
         stocks: stocks,
         description: desc,
         images: item.PictureDetails.PictureURL,
+        option1: item.ItemID,
       })
     };
     const res = await fetch('http://localhost:8000/api/products/create', requestOptions)
@@ -69,7 +71,6 @@ function Seller({ router: { query } }) {
     }
   }, [item, exchangeRate, profitRate])
   console.log(item)
-  console.log(status)
 
   return (
     <div className='p-5 bg-slate-100'>

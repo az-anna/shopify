@@ -19,7 +19,7 @@ export default function Home({ products }: ShopifyProductProps) {
 
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [queryTerm, setQueryTerm] = useState<string>('')
-  const [filteredProducts, setFilteredProducts] = useState<ShopifyProduct[]>(products.slice(0, 100))
+  const [filteredProducts, setFilteredProducts] = useState<ShopifyProduct[]>(products)
   const [selectedShopifyItem, setSelectedShopifyItem] = useState<ShopifyProduct>()
   const [ebayItems, setEbayItems] = useState()
   const [ebayItemDetails, setEbayItemDetails] = useState()
@@ -62,6 +62,7 @@ export default function Home({ products }: ShopifyProductProps) {
       setSelectedEbayItem(selected)
       const res = await fetch(`http://localhost:8000/api/products/ebay/item?id=${itemId}`)
       const data = await res.json()
+      console.log(data['Item'])
       setEbayItemDetails(data['Item'])
     }
   }
@@ -70,10 +71,14 @@ export default function Home({ products }: ShopifyProductProps) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        barcode: selectedShopifyItem!.variants[0].barcode,
         inventory: stock,
+        inventory_id: selectedShopifyItem!.variants[0].inventory_item_id,
         id: selectedShopifyItem!.id,
         sku: selectedShopifyItem!.variants[0].sku,
-        price: selectedShopifyItem!.variants[0].price
+        price: selectedShopifyItem!.variants[0].price,
+        option1: selectedShopifyItem!.variants[0].option1,
+        status: selectedShopifyItem!.status
       })
     };
     const res = await fetch('http://localhost:8000/api/products/update', requestOptions)
