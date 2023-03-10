@@ -37,7 +37,7 @@ export default function Home({ products }: ShopifyProductProps) {
   async function fetchItems() {
     const res = await fetch(`http://localhost:8000/api/products/ebay?q=${queryTerm}`)
     const data = await res.json()
-    setEbayItems(data['searchResult']['item'])
+    setEbayItems(data['item'])
   }
 
   function handleKeyDown(e) {
@@ -77,7 +77,6 @@ export default function Home({ products }: ShopifyProductProps) {
         id: selectedShopifyItem!.id,
         sku: selectedShopifyItem!.variants[0].sku,
         price: selectedShopifyItem!.variants[0].price,
-        option1: selectedShopifyItem!.variants[0].option1,
         status: selectedShopifyItem!.status
       })
     };
@@ -205,7 +204,7 @@ export default function Home({ products }: ShopifyProductProps) {
                   <ProductItem
                     image={item.galleryURL}
                     title={item.title}
-                    price={item.sellingStatus.currentPrice._currencyId + " " + item.sellingStatus.currentPrice.value}
+                    price={item.sellingStatus ? item.sellingStatus.currentPrice._currencyId + " " + item.sellingStatus.currentPrice.value : null}
                   />
                 </li>
               ))}

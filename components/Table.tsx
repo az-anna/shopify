@@ -23,25 +23,24 @@ export default function Table({ data }: ShopifyProductProps) {
   async function updateProduct() {
     const price = newPrice ? newPrice : selectedItem!.variants[0].price
     const inventory = newStock !== null ? newStock : selectedItem!.variants[0].inventory_quantity
-    const barcode = date ? date : selectedItem!.variants[0].barcode
     const status = newStatus ? newStatus : selectedItem!.status
     const requestOptions = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        barcode: barcode,
+        barcode: selectedItem!.variants[0].barcode,
         inventory: inventory,
         inventory_id: selectedItem!.variants[0].inventory_item_id,
         id: selectedItem!.id,
         sku: selectedItem!.variants[0].sku,
         price: price,
-        option1: selectedItem!.variants[0].option1,
         status: status
       })
     };
     const res = await fetch('http://localhost:8000/api/products/update', requestOptions)
     if (res.status) {
       setShowModal(false)
+      window.location.reload(true)
     }
   }
 
@@ -105,7 +104,7 @@ export default function Table({ data }: ShopifyProductProps) {
                   <tr key={product.id}>
                     <td className="whitespace-nowrap py-4 text-center text-sm font-medium  text-blue-600 hover:underline">
                       <Link
-                        href={product.variants[0].option1.split(',')[1]}
+                        href={product.variants[0].barcode.split(',')[1]}
                         target="_blank"
                       >
                         {product.title}
@@ -224,10 +223,6 @@ export default function Table({ data }: ShopifyProductProps) {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className='flex justify-center m-auto'>
-                  <input type='date' id="date" name="date" lang="en-GB" value={date} onChange={e => setDate(e.target.value)} />
                 </div>
                 <div className='flex justify-center'>
                   <div className="my-5 mr-5">
