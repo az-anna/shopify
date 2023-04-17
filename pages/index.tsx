@@ -285,7 +285,7 @@ export default function Home({ products }: ShopifyProductProps) {
 
 
 export async function getServerSideProps() {
-  const res = await fetch('http://127.0.0.1:8000/api/products/')
+  const res = await fetch('http://127.0.0.1:8000/api/products')
   const data = await res.json()
 
   return {
