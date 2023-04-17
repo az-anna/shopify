@@ -29,13 +29,13 @@ export default function Home({ products }: ShopifyProductProps) {
 
   async function filterProducts() {
     const searchTerms = searchTerm.replace('　', ' ').split(' ')
-    const res = await fetch(`http://localhost:8000/api/products/shopify?vendor=${searchTerms}`)
+    const res = await fetch(`http://127.0.0.1:8000/api/products/shopify?vendor=${searchTerms}`)
     const data = await res.json()
     setFilteredProducts(data)
   }
 
   async function fetchItems() {
-    const res = await fetch(`http://localhost:8000/api/products/ebay?q=${queryTerm}`)
+    const res = await fetch(`http://127.0.0.1:8000/api/products/ebay?q=${queryTerm}`)
     const data = await res.json()
     setEbayItems(data['item'])
   }
@@ -60,7 +60,7 @@ export default function Home({ products }: ShopifyProductProps) {
     if (ebayItems) {
       const selected = ebayItems.find(i => i.itemId === itemId)
       setSelectedEbayItem(selected)
-      const res = await fetch(`http://localhost:8000/api/products/ebay/item?id=${itemId}`)
+      const res = await fetch(`http://127.0.0.1:8000/api/products/ebay/item?id=${itemId}`)
       const data = await res.json()
       console.log(data['Item'])
       setEbayItemDetails(data['Item'])
@@ -80,7 +80,7 @@ export default function Home({ products }: ShopifyProductProps) {
         status: selectedShopifyItem!.status
       })
     };
-    const res = await fetch('http://localhost:8000/api/products/update', requestOptions)
+    const res = await fetch('http://127.0.0.1:8000/api/products/update', requestOptions)
     if (res.status) {
       setShowModal(false)
     }
@@ -102,7 +102,6 @@ export default function Home({ products }: ShopifyProductProps) {
       <div className='mx-3 grid grid-cols-12 items-start gap-x-4'>
         <section className='col-span-4 px-2 h-screen'>
           <div className='flex mt-3  gap-x-3 items-baseline'>
-
             <div className='w-3/5 text-right font-semibold'>
               Shopify 商品一覧
             </div>
@@ -286,7 +285,7 @@ export default function Home({ products }: ShopifyProductProps) {
 
 
 export async function getServerSideProps() {
-  const res = await fetch('http://localhost:8000/api/products')
+  const res = await fetch('http://127.0.0.1:8000/api/products/')
   const data = await res.json()
 
   return {

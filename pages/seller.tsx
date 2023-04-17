@@ -41,7 +41,7 @@ function Seller({ router: { query } }) {
         itemId: item.ItemID,
       })
     };
-    const res = await fetch('http://localhost:8000/api/products/create', requestOptions)
+    const res = await fetch('http://127.0.0.1:8000/api/products/create', requestOptions)
     if (res.status) {
       setLoading(false)
       setStatus(res.status)

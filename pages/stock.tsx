@@ -7,7 +7,7 @@ function Stock() {
   const [products, setProducts] = useState(null)
 
   async function getProducts() {
-    const res = await fetch('http://localhost:8000/api/products/ebay/inventory')
+    const res = await fetch('http://127.0.0.1:8000/api/products/ebay/inventory')
     const data = await res.json()
     setProducts(data)
   }
