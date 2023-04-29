@@ -6,41 +6,53 @@ import Editor from '../components/TextEditor';
 import { descAtom, tagAtom } from '../utils/atoms'
 import { useAtom } from 'jotai'
 import { ConfirmationModal } from '../components/Modal';
+import { EbayProduct } from '../utils/types';
+import { ArrowsUpDownIcon } from "@heroicons/react/24/solid"
+import { GlobeAltIcon } from '@heroicons/react/20/solid';
+
 
 function Seller({ router: { query } }) {
   const router = useRouter()
-  const [item, setItem] = useState()
+  const [item, setItem] = useState<EbayProduct>()
   const [isShipped, setIsShipped] = useState("")
   const [price, setPrice] = useState<number>(0)
-  const [sellingPrice, setSellingPrice] = useState<number>()
-  const [stocks, setStocks] = useState<number>()
+  const [sellingPrice, setSellingPrice] = useState<number>(0)
+  const [stocks, setStocks] = useState<number>(1)
   const [exchangeRate, setExchangeRate] = useState<number>(1)
   const [profitRate, setProfitRate] = useState<number>(1)
   const [title, setTitle] = useState<string>("")
   const [tags, setTags] = useAtom(tagAtom)
-  const [desc,setDesc] = useAtom(descAtom)
+  const [desc, setDesc] = useAtom(descAtom)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [status, setStatus] = useState<number>()
+  const [productStatus, setProductStatus] = useState<string>("draft")
   const [loading, setLoading] = useState<boolean>(false)
 
+
   async function submitHandler(e: FormEvent) {
+
     e.preventDefault()
     setLoading(true)
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        itemUrl: item.ListingDetails.ViewItemURL,
-        title: title,
-        tags: tags.map(tag => tag.id).join(','),
-        vendor: item.Seller.UserID,
-        price: sellingPrice,
-        stocks: stocks,
-        description: desc,
-        images: item.PictureDetails.PictureURL,
-        itemId: item.ItemID,
-      })
-    };
+    if (item) {
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemUrl: item.ListingDetails.ViewItemURL,
+          title: title,
+          tags: tags.map(tag => tag.id).join(','),
+          vendor: item.Seller.UserID,
+          price: sellingPrice,
+          stocks: stocks,
+          description: desc,
+          images: item.PictureDetails.PictureURL,
+          itemId: item.ItemID,
+          sku: item.Title
+        })
+      };
+
+    }
+
     const res = await fetch('http://127.0.0.1:8000/api/products/create', requestOptions)
     if (res.status) {
       setLoading(false)
@@ -49,6 +61,26 @@ function Seller({ router: { query } }) {
       setDesc('')
       setShowModal(true)
     }
+  }
+
+  function clickHandler() {
+    setSellingPrice(price)
+  }
+  function setStatusToDraft() {
+    setProductStatus('draft')
+  }
+  function setStatusToActive() {
+    setProductStatus('active')
+  }
+  async function fetchRate(){
+    if (item) {
+      const currency = item.Currency
+      const response = await fetch(`https://api.exchangerate.host/latest?base=JPY&symbols=${currency}`);
+      const data = await response.json();
+      const rate = parseFloat((1 / data.rates[currency]).toFixed(2))
+      setExchangeRate(rate)
+    }
+    console.log(exchangeRate)
   }
 
   useEffect(() => {
@@ -131,26 +163,32 @@ function Seller({ router: { query } }) {
               ) : null}
             </div>
             <div className="rounded-lg bg-indigo-100 shadow">
-              <div className="p-3 grid grid-cols-3 gap-x-6">
-                <div className="col-span-1">
-                  <p className="text-xs pb-3">価格設定</p>
-                  <p>¥ {isNaN(price) ? null : price}</p>
+              <div className="p-3 grid grid-cols-9 gap-x-6">
+                <div className="col-span-3 text-center">
+                  <p className="text-sm pb-2">価格設定</p>
+                  <p>¥ {isNaN(price) ? null : price.toLocaleString()}</p>
                 </div>
-                <div className="col-span-1">
-                  <p className="text-xs pb-1">為替レート</p>
-                  <div className="flex rounded-md shadow-sm pr-2">
+                <div className="col-span-2 text-center">
+                  <div className="flex">
+                    <p className="text-sm pb-1">為替レート</p>
+                    <GlobeAltIcon
+                      className="w-4 ml-2 -mt-1 cursor-pointer hover:w-5 text-indigo-700 transition-all"
+                      onClick={fetchRate}
+                    />
+                  </div>
+                  <div className="flex rounded-md shadow-sm">
                     <input
-                      type="number"
+                      // type="number"
                       id="exchange-rate"
-                      value={exchangeRate}
+                      value={isNaN(exchangeRate) ? "" : exchangeRate}
                       onChange={e => e.target.value.length > 0 ? setExchangeRate(parseFloat(e.target.value)) : setExchangeRate(NaN)}
-                      className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2"
+                      className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 text-center"
                     />
                   </div>
                 </div>
-                <div className="col-span-1">
-                  <p className="text-xs pb-1">倍率</p>
-                  <div className="flex rounded-md shadow-sm pr-2">
+                <div className="col-span-2 text-center">
+                  <p className="text-sm pb-1">倍率</p>
+                  <div className="flex rounded-md shadow-sm">
                     <input
                       type="number"
                       id="profit-rate"
@@ -158,9 +196,17 @@ function Seller({ router: { query } }) {
                       step="0.1"
                       value={profitRate}
                       onChange={e => e.target.value.length > 0 ? setProfitRate(parseFloat(e.target.value)) : setProfitRate(NaN)}
-                      className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2"
+                      className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2 text-center"
                     />
                   </div>
+                </div>
+                <div className="col-span-2 text-center pt-3">
+                  <button
+                    className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 "
+                    onClick={clickHandler}
+                  >
+                    設定する
+                  </button>
                 </div>
               </div>
             </div>
@@ -185,15 +231,15 @@ function Seller({ router: { query } }) {
                       </div>
                     </div>
                   </div>
-                  <div className="">
+                  <div className="pb-3">
                     <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
                       タグ
                     </label>
-                    <div className="mt-1 flex rounded-md shadow-sm ">
+                    <div className="my-1 flex rounded-md shadow-sm ">
                       <Tags />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-12">
+                  <div className="grid grid-cols-3 gap-12">
                     <div className="col-span-1">
                       <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
                         価格
@@ -203,6 +249,7 @@ function Seller({ router: { query } }) {
                           type="number"
                           name="product-price"
                           id="product-price"
+                          value={sellingPrice}
                           className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           onChange={e => setSellingPrice(parseInt(e.target.value))}
                         />
@@ -217,11 +264,33 @@ function Seller({ router: { query } }) {
                           type="number"
                           name="product-quantity"
                           id="product-quantity"
+                          value={stocks}
                           className="block w-full flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           onChange={e => setStocks(parseInt(e.target.value))}
                         />
                       </div>
                     </div>
+                    <div>
+                      <label htmlFor="company-website" className="block pb-2 text-sm font-medium text-gray-700">
+                        登録時ステータス
+                      </label>
+                      <div className='h-7 w-36 rounded-md bg-gray-200'>
+                        <div className='flex items-center text-sm font-medium transition-colors'>
+                          <button
+                            onClick={setStatusToDraft}
+                            className={`mt-0.5 mx-0.5 h-6 w-1/2 text-center ${productStatus === 'active' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
+                            下書き
+                          </button>
+                          <button
+                            onClick={setStatusToActive}
+                            className={`mt-0.5 mx-0.5 h-6 w-1/2 text-center ${productStatus === 'draft' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
+                            公開
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+
 
                   </div>
                   <div className=''>

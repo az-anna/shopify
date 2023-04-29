@@ -37,7 +37,7 @@ export const Tags = () => {
           delimiters={delimiters}
           handleDelete={handleDelete}
           handleAddition={handleAddition}
-          inputFieldPosition="top"
+          inputFieldPosition="bottom"
           autocomplete
         />
     </div>

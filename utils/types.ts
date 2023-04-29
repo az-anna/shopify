@@ -25,3 +25,29 @@ export interface ShopifyProduct {
   variants: Variants[]
   images: ShopifyImage[];
 }
+
+export interface EbayProduct {
+  ItemID: string;
+  Title: string;
+  Currency:string;
+  ListingDetails: {
+    ViewItemURL: string;
+  };
+  Seller: {
+    UserID: string
+  };
+  PictureDetails: {
+    PictureURL: string
+  };
+  ShipToLocations: string;
+  SellingStatus: {
+    CurrentPrice: {
+      value: string,
+      _currencyID: string;
+    };
+  }
+  Quantity: string;
+  Storefront: {
+    StoreURL: string
+   };
+}
