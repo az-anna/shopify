@@ -9,6 +9,7 @@ import { ConfirmationModal } from '../components/Modal';
 import { EbayProduct } from '../utils/types';
 import { ArrowsUpDownIcon } from "@heroicons/react/24/solid"
 import { GlobeAltIcon } from '@heroicons/react/20/solid';
+import { BACKEND_URL } from '../utils/urls';
 
 
 function Seller({ router: { query } }) {
@@ -53,7 +54,7 @@ function Seller({ router: { query } }) {
 
     }
 
-    const res = await fetch('http://127.0.0.1:8000/api/products/create', requestOptions)
+    const res = await fetch(`${BACKEND_URL}api/products/create`, requestOptions)
     if (res.status) {
       setLoading(false)
       setStatus(res.status)

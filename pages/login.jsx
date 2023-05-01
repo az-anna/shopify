@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/router';
 import InputField from "../components/InputField";
 import Button from "../components/Button";
-import { login } from "../utils/AuthService";
+import { BACKEND_URL } from '../utils/urls';
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonEnabled, setButtonEnabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (email && password) {
@@ -18,10 +20,22 @@ function LoginPage() {
   }, [email, password, buttonEnabled]);
 
   const loginUser = async () => {
+    const data = {"data": { id: email, pw: password}}
     try {
-      await login(email, password);
-      navigate("/");
-      window.location.reload(false);
+      const res = await fetch(`${BACKEND_URL}api/user/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      const result = await res.json()
+      if (result.token) {
+        localStorage.setItem("token", JSON.stringify(result))
+        router.push('/')
+      } else {
+        setErrorMessage(true)
+      }
     } catch (error) {
       setErrorMessage(error);
     }
@@ -59,12 +73,6 @@ function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <a
-          href="/forgot/"
-          className="mt-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-        >
-          Forgot password?
-        </a>
         <Button title="Login" disabled={!buttonEnabled} />
       </form>
     </div>
