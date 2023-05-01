@@ -69,7 +69,6 @@ export default function Home({ products }: ShopifyProductProps) {
       setSelectedEbayItem(selected)
       const res = await fetch(`${BACKEND_URL}api/products/ebay/item?id=${itemId}`)
       const data = await res.json()
-      console.log(data['Item'])
       setEbayItemDetails(data['Item'])
     }
   }
@@ -111,8 +110,6 @@ export default function Home({ products }: ShopifyProductProps) {
       setIsLoading(false)
     }
   }, [loading, isAuthenticated, router]);
-
-  console.log(products)
 
   return (
     isLoading

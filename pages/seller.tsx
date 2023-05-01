@@ -7,7 +7,6 @@ import { descAtom, tagAtom } from '../utils/atoms'
 import { useAtom } from 'jotai'
 import { ConfirmationModal } from '../components/Modal';
 import { EbayProduct } from '../utils/types';
-import { ArrowsUpDownIcon } from "@heroicons/react/24/solid"
 import { GlobeAltIcon } from '@heroicons/react/20/solid';
 import { BACKEND_URL } from '../utils/urls';
 
@@ -31,7 +30,6 @@ function Seller({ router: { query } }) {
 
 
   async function submitHandler(e: FormEvent) {
-
     e.preventDefault()
     setLoading(true)
     if (item) {
@@ -48,19 +46,18 @@ function Seller({ router: { query } }) {
           description: desc,
           images: item.PictureDetails.PictureURL,
           itemId: item.ItemID,
-          sku: item.Title
+          sku: item.Title,
+          status: productStatus
         })
       };
-
-    }
-
-    const res = await fetch(`${BACKEND_URL}api/products/create`, requestOptions)
-    if (res.status) {
-      setLoading(false)
-      setStatus(res.status)
-      setTags([{ id: '新着商品', text: '新着商品' }])
-      setDesc('')
-      setShowModal(true)
+      const res = await fetch(`${BACKEND_URL}api/products/create`, requestOptions)
+      if (res.status) {
+        setLoading(false)
+        setStatus(res.status)
+        setTags([{ id: '新着商品', text: '新着商品' }])
+        setDesc('')
+        setShowModal(true)
+      }
     }
   }
 
@@ -73,15 +70,14 @@ function Seller({ router: { query } }) {
   function setStatusToActive() {
     setProductStatus('active')
   }
-  async function fetchRate(){
+  async function fetchRate() {
     if (item) {
-      const currency = item.Currency
-      const response = await fetch(`https://api.exchangerate.host/latest?base=JPY&symbols=${currency}`);
-      const data = await response.json();
-      const rate = parseFloat((1 / data.rates[currency]).toFixed(2))
+      const code = item.Currency
+      const response = await fetch(`${BACKEND_URL}api/currency/rates?code=${code}`);
+      const { data } = await response.json();
+      const rate = parseFloat((1 / data[code]).toFixed(2))
       setExchangeRate(rate)
     }
-    console.log(exchangeRate)
   }
 
   useEffect(() => {
@@ -103,7 +99,7 @@ function Seller({ router: { query } }) {
       setPrice(Math.round(parseFloat(item.SellingStatus.CurrentPrice.value) * exchangeRate * profitRate))
     }
   }, [item, exchangeRate, profitRate])
-  console.log(item)
+
 
   return (
     <div className='p-5 bg-slate-100'>
@@ -164,13 +160,13 @@ function Seller({ router: { query } }) {
               ) : null}
             </div>
             <div className="rounded-lg bg-indigo-100 shadow">
-              <div className="p-3 grid grid-cols-9 gap-x-6">
+              <div className="p-3 grid grid-cols-9">
                 <div className="col-span-3 text-center">
                   <p className="text-sm pb-2">価格設定</p>
                   <p>¥ {isNaN(price) ? null : price.toLocaleString()}</p>
                 </div>
-                <div className="col-span-2 text-center">
-                  <div className="flex">
+                <div className="col-span-2 -mt-0.5 text-center">
+                  <div className="inline-flex">
                     <p className="text-sm pb-1">為替レート</p>
                     <GlobeAltIcon
                       className="w-4 ml-2 -mt-1 cursor-pointer hover:w-5 text-indigo-700 transition-all"
@@ -179,7 +175,7 @@ function Seller({ router: { query } }) {
                   </div>
                   <div className="flex rounded-md shadow-sm">
                     <input
-                      // type="number"
+                      type="text"
                       id="exchange-rate"
                       value={isNaN(exchangeRate) ? "" : exchangeRate}
                       onChange={e => e.target.value.length > 0 ? setExchangeRate(parseFloat(e.target.value)) : setExchangeRate(NaN)}
@@ -187,7 +183,7 @@ function Seller({ router: { query } }) {
                     />
                   </div>
                 </div>
-                <div className="col-span-2 text-center">
+                <div className="col-span-2 text-center pl-4">
                   <p className="text-sm pb-1">倍率</p>
                   <div className="flex rounded-md shadow-sm">
                     <input
@@ -201,9 +197,9 @@ function Seller({ router: { query } }) {
                     />
                   </div>
                 </div>
-                <div className="col-span-2 text-center pt-3">
+                <div className="col-span-2 text-center pt-6">
                   <button
-                    className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 "
+                    className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 "
                     onClick={clickHandler}
                   >
                     設定する
@@ -277,16 +273,16 @@ function Seller({ router: { query } }) {
                       </label>
                       <div className='h-7 w-36 rounded-md bg-gray-200'>
                         <div className='flex items-center text-sm font-medium transition-colors'>
-                          <button
+                          <div
                             onClick={setStatusToDraft}
-                            className={`mt-0.5 mx-0.5 h-6 w-1/2 text-center ${productStatus === 'active' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
+                            className={`mt-0.5 mx-0.5 h-6 w-1/2 inline-flex items-center justify-center cursor-pointer ${productStatus === 'active' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
                             下書き
-                          </button>
-                          <button
+                          </div>
+                          <div
                             onClick={setStatusToActive}
-                            className={`mt-0.5 mx-0.5 h-6 w-1/2 text-center ${productStatus === 'draft' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
+                            className={`mt-0.5 mx-0.5 h-6 w-1/2 inline-flex items-center justify-center cursor-pointer ${productStatus === 'draft' ? "bg-gray-200 text-gray-500" : "text-indigo-600 bg-white rounded-md shadow-sm"}`}>
                             公開
-                          </button>
+                          </div>
                         </div>
                       </div>
 
