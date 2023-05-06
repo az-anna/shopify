@@ -21,6 +21,7 @@ function Seller({ router: { query } }) {
   const [exchangeRate, setExchangeRate] = useState<number>(1)
   const [profitRate, setProfitRate] = useState<number>(1)
   const [title, setTitle] = useState<string>("")
+  const [checked, setChecked] = useState<boolean>(false)
   const [tags, setTags] = useAtom(tagAtom)
   const [desc, setDesc] = useAtom(descAtom)
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -28,6 +29,9 @@ function Seller({ router: { query } }) {
   const [productStatus, setProductStatus] = useState<string>("draft")
   const [loading, setLoading] = useState<boolean>(false)
 
+  function handleCheckboxChange(e) {
+    setChecked(e.target.checked)
+  }
 
   async function submitHandler(e: FormEvent) {
     e.preventDefault()
@@ -93,12 +97,24 @@ function Seller({ router: { query } }) {
       locations.includes("JP") ? setIsShipped("可") : setIsShipped("不可")
     }
   }, [item])
+
   useEffect(() => {
     if (isNaN(exchangeRate) || isNaN(profitRate) || !item) {
     } else {
       setPrice(Math.round(parseFloat(item.SellingStatus.CurrentPrice.value) * exchangeRate * profitRate))
     }
   }, [item, exchangeRate, profitRate])
+
+  useEffect(() => {
+    if (checked) {
+      setPrice(Math.trunc(price / 1000) * 1000)
+    } else {
+      if (isNaN(exchangeRate) || isNaN(profitRate) || !item) {
+      } else {
+        setPrice(Math.round(parseFloat(item.SellingStatus.CurrentPrice.value) * exchangeRate * profitRate))
+      }
+    }
+  }, [checked, price, exchangeRate, profitRate, item])
 
 
   return (
@@ -193,11 +209,24 @@ function Seller({ router: { query } }) {
                       step="0.1"
                       value={profitRate}
                       onChange={e => e.target.value.length > 0 ? setProfitRate(parseFloat(e.target.value)) : setProfitRate(NaN)}
-                      className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2 text-center"
+                      className="block w-full rounded-md pl-6 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 px-2 text-center"
                     />
                   </div>
                 </div>
-                <div className="col-span-2 text-center pt-6">
+                <div className="col-span-2 text-center pl-4">
+                  <div className='flex items-center pb-1'>
+                    <input
+                      type="checkbox"
+                      className="rounded-sm ml-3 mr-1 w-3.5 h-3.5 focus:outline-none focus:ring-1"
+                      checked={checked}
+                      onChange={handleCheckboxChange}
+                    />
+                    <p className=' text-sm'>
+                      端数切捨
+                    </p>
+                  </div>
+
+
                   <button
                     className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 "
                     onClick={clickHandler}
